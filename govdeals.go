@@ -8,6 +8,20 @@ import (
 	"strings"
 )
 var govdealsUrl = "https://www.govdeals.com/index.cfm?fa=Main.AdvSearchResultsNew&searchPg=Category&additionalParams=true&sortOption=ad&timing=BySimple&timingType=&category=57"
+
+var govdeals = "https://www.govdeals.com/"
+
+type Product struct {
+	Name string
+	Slug string
+	DateCreated string
+	Description string
+	RegularPrice string 
+	Image string
+
+}
+
+type nodeOption func(*html.Node) bool
 func LoadUrl(url string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -30,16 +44,18 @@ func ParsePage(page string) (*html.Node, error) {
 	return node, nil
 }
 
-func getNodesWithAttrValue(node *html.Node,elm, attrKey, attrValue string) (elements []*html.Node) {
+func getNodesWithOptions(node *html.Node, options ...nodeOption) (elements []*html.Node) {
 	var f func(*html.Node)
 	f = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == elm {
-			for _, a := range n.Attr {
-				if a.Key == attrKye && a.Val == attrValue {
-					elements = append(elements, n)
-					break
-				}
+		doAppend := true
+		for _, op := range(options) {
+			if !op(n) {
+				doAppend = false
+				break
 			}
+		}
+		if doAppend {
+			elements = append(elements, n)
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			f(c)
@@ -49,6 +65,48 @@ func getNodesWithAttrValue(node *html.Node,elm, attrKey, attrValue string) (elem
 	return
 }
 
+func getNodesWithAttrValue(node *html.Node,elm, attrKey, attrValue string) (elements []*html.Node) {
+	var f nodeOption
+	f = func(n *html.Node) bool {
+		if n.Type == html.ElementNode && n.Data == elm {
+			for _, a := range n.Attr {
+				if a.Key == attrKey && a.Val == attrValue {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	return getNodesWithOptions(node, f)
+	
+}
+
+func getNodesWithTagName(node *html.Node, tag string) (elements []*html.Node) {
+	var f nodeOption
+	f = func(n *html.Node) bool {
+		if n.Type == html.ElementNode && n.Data == tag {
+			return true
+		}
+		return false
+	}
+	return getNodesWithOptions(node, f)
+	
+}
+
 func GetProductNodes(node *html.Node) []*html.Node {
 	return getNodesWithAttrValue(node, "div" ,"id" ,"boxx_row")
+}
+
+
+func GetProductUrl(product *html.Node) (string, error) {
+	aNode := getNodesWithAttrValue(product, "div", "id", "result_col_2")[0]
+	aTag := getNodesWithTagName(aNode, "a")[0]
+	for _, attr := range(aTag.Attr) {
+		if attr.Key == "href" {
+			return attr.Val, nil
+		}
+	}
+	return "", fmt.Errorf("No product url")
+
+
 }
