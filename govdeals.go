@@ -30,10 +30,10 @@ func ParsePage(page string) (*html.Node, error) {
 	return node, nil
 }
 
-func getNodesWithAttrValue(node *html.Node, attrKey, attrValue string) (elements []*html.Node) {
+func getNodesWithAttrValue(node *html.Node,elm, attrKey, attrValue string) (elements []*html.Node) {
 	var f func(*html.Node)
 	f = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "div" {
+		if n.Type == html.ElementNode && n.Data == elm {
 			for _, a := range n.Attr {
 				if a.Key == attrKye && a.Val == attrValue {
 					elements = append(elements, n)
@@ -50,5 +50,5 @@ func getNodesWithAttrValue(node *html.Node, attrKey, attrValue string) (elements
 }
 
 func GetProductNodes(node *html.Node) []*html.Node {
-	return getNodesWithAttrValue(node, "id" ,"boxx_row")
+	return getNodesWithAttrValue(node, "div" ,"id" ,"boxx_row")
 }
