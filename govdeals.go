@@ -13,12 +13,14 @@ var govdeals = "https://www.govdeals.com/"
 
 type Product struct {
 	Name string
-	Slug string
-	DateCreated string
 	Description string
-	RegularPrice string 
+	Price string 
 	Image string
 
+}
+
+func (p Product) String() string {
+	return fmt.Sprintf("name:%s\ndescription:%s\nprice:%s\nimage:%s\n", p.Name, p.Description, p.Price, p.Image)
 }
 
 type nodeOption func(*html.Node) bool

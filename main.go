@@ -22,6 +22,11 @@ func main() {
 			fmt.Println(err)
 			return
 		}
-		fmt.Println(govdeals+url)
+		prdct, err := ParseProductPage(govdeals+url)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(prdct)
 	}
 }
