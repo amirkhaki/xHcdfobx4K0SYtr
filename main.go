@@ -16,13 +16,13 @@ func main() {
 		return
 	}
 	elms := GetProductNodes(node)
-	for i := range(elms) {
+	for i := range elms {
 		url, err := GetProductUrl(elms[i])
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		prdct, err := ParseProductPage(govdeals+url)
+		prdct, err := ParseProductPage(govdeals + url)
 		if err != nil {
 			fmt.Println(err)
 			return

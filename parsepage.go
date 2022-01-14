@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
-	"strings"
 	"bytes"
+	"fmt"
 	"golang.org/x/net/html"
+	"strings"
 )
+
 func render(nodes ...*html.Node) {
-	for i, n := range(nodes) {
+	for i, n := range nodes {
 		var buf bytes.Buffer
-		html.Render( &buf, n)
+		html.Render(&buf, n)
 		fmt.Println("#", i)
 		fmt.Println(buf.String())
 	}
@@ -64,7 +65,7 @@ func ParseProductPage(url string) (Product, error) {
 
 	}
 	product.Price = priceNode.Data
-	sellerTbl := getNodesWithAttrValue(rootNode, "table" ,"class", "table ml-1 pl-0")[0]
+	sellerTbl := getNodesWithAttrValue(rootNode, "table", "class", "table ml-1 pl-0")[0]
 	tdDesc := getNodesWithAttrValue(sellerTbl, "td", "colspan", "2")[1]
 	descP := getNodesWithOptions(tdDesc, func(n *html.Node) bool {
 		if n.Type == html.ElementNode && (n.Data == "P" || n.Data == "p") {
