@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	page, err := LoadUrl(govdealsUrl)
+	page, err := LoadUrl(GetCategoryUrl(57, 1, 25))
 	if err != nil {
 		fmt.Println(err)
 		return

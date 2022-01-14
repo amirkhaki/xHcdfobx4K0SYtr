@@ -7,9 +7,10 @@ import (
 	"golang.org/x/net/html"
 	"strings"
 )
-var govdealsUrl = "https://www.govdeals.com/index.cfm?fa=Main.AdvSearchResultsNew&searchPg=Category&additionalParams=true&sortOption=ad&timing=BySimple&timingType=&category=57"
-
 var govdeals = "https://www.govdeals.com/"
+func GetCategoryUrl(category, start, count int) string {
+	return fmt.Sprintf("%sindex.cfm?fa=Main.AdvSearchResultsNew&searchPg=Category&additionalParams=true&sortOption=ad&timing=BySimple&timingType=&category=%d&rowCount=%d&StartRow=%d", govdeals, category, count, start)
+}
 
 type Product struct {
 	Name string
