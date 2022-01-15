@@ -21,7 +21,7 @@ type Product struct {
 	Status      string `json:"status"`
 	Description string `json:"description"`
 	Price       string `json:"sale_price"`
-	Image       string `json:"-"`
+	Images []map[string]string `json:"images"`
 }
 func (p Product) ToJson() string {
 	p.Status = "pending"
@@ -37,7 +37,7 @@ func (p Product) ToValues() (values url.Values) {
 	return
 }
 func (p Product) String() string {
-	return fmt.Sprintf("name:%s\ndescription:%s\nprice:%s\nimage:%s\n", p.Name, p.Description, p.Price, p.Image)
+	return fmt.Sprintf("name:%s\ndescription:%s\nprice:%s\nimage:%s\n", p.Name, p.Description, p.Price, p.Images)
 }
 
 type nodeOption func(*html.Node) bool

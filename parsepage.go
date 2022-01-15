@@ -29,7 +29,7 @@ func ParseProductPage(url string) (Product, error) {
 	imageATag := getNodesWithAttrValue(rootNode, "a", "id", "thumb1")[0]
 	for _, attr := range imageATag.Attr {
 		if attr.Key == "href" {
-			product.Image = "https://govdeals.com" + attr.Val
+			product.Images = append(product.Images, map[string]string{"src" :"https://govdeals.com" + attr.Val} )
 		}
 	}
 	titleTdTag := getNodesWithAttrValue(rootNode, "td", "id", "asset_short_desc_id")[0]
