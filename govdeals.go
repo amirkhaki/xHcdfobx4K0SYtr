@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"golang.org/x/net/html"
 	"io"
-	"encoding/json"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,17 +17,18 @@ func GetCategoryUrl(category, start, count int) string {
 }
 
 type Product struct {
-	Name        string `json:"name"`
-	Status      string `json:"status"`
-	Description string `json:"description"`
-	Price       string `json:"sale_price"`
-	Images []map[string]string `json:"images"`
+	Name        string              `json:"name"`
+	Status      string              `json:"status"`
+	Description string              `json:"description"`
+	Price       string              `json:"sale_price"`
+	Images      []map[string]string `json:"images"`
 }
+
 func (p Product) ToJson() string {
 	p.Status = "pending"
 	jsonStr, _ := json.Marshal(p)
 	return string(jsonStr)
-}  
+}
 func (p Product) ToValues() (values url.Values) {
 	values = make(url.Values)
 	values.Set("name", p.Name)
