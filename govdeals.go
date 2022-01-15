@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"golang.org/x/net/html"
 	"io"
+	"encoding/json"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -15,12 +17,25 @@ func GetCategoryUrl(category, start, count int) string {
 }
 
 type Product struct {
-	Name        string
-	Description string
-	Price       string
-	Image       string
+	Name        string `json:"name"`
+	Status      string `json:"status"`
+	Description string `json:"description"`
+	Price       string `json:"sale_price"`
+	Image       string `json:"-"`
 }
-
+func (p Product) ToJson() string {
+	p.Status = "pending"
+	jsonStr, _ := json.Marshal(p)
+	return string(jsonStr)
+}  
+func (p Product) ToValues() (values url.Values) {
+	values = make(url.Values)
+	values.Set("name", p.Name)
+	values.Set("status", "pending")
+	values.Set("sale_price", p.Price)
+	values.Set("description", p.Description)
+	return
+}
 func (p Product) String() string {
 	return fmt.Sprintf("name:%s\ndescription:%s\nprice:%s\nimage:%s\n", p.Name, p.Description, p.Price, p.Image)
 }

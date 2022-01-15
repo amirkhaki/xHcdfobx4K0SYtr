@@ -28,6 +28,6 @@ func main() {
 			return
 		}
 
-		fmt.Println(prdct)
+		fmt.Println(SendProduct(prdct))
 	}
 }
