@@ -20,13 +20,52 @@ type Product struct {
 	Name        string              `json:"name"`
 	Status      string              `json:"status"`
 	Description string              `json:"description"`
-	Price       string              `json:"sale_price"`
+	Price       string              `json:"regular_price"`
 	Images      []map[string]string `json:"images"`
 }
 
+func (p Product) UploadImages() []map[string]string {
+	var response map[string]interface{}
+	var images []map[string]string
+	for _, img := range(p.Images) {
+		if src, ok := img["src"]; ok {
+			f, err := DownloadFile(src) 
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			resp, err := UploadFile("https://file.io", f.Name())
+			fmt.Println(resp)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			err = json.Unmarshal([]byte(resp), &response)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			fmt.Println(response)
+			if imgSrc, ok := response["link"].(string); ok {
+				images = append(images, map[string]string{"src": imgSrc})
+
+			}
+		}
+	}
+	return images
+}
+func (p Product) GetPrice() (price string) {
+	price = strings.Replace(p.Price, "$", "", -1)
+	price = strings.Replace(price, ",", "", -1)
+	return
+}
 func (p Product) ToJson() string {
 	p.Status = "pending"
+	//p.Images = p.UploadImages()
+	p.Images = []map[string]string{}
+	p.Price = p.GetPrice()
 	jsonStr, _ := json.Marshal(p)
+	fmt.Println(string(jsonStr))
 	return string(jsonStr)
 }
 func (p Product) ToValues() (values url.Values) {

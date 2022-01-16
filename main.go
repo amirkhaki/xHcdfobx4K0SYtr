@@ -29,6 +29,8 @@ func GetStartRowsFromUrl(uri string) (from, to int, err error) {
 	return
 }
 func main() {
+
+	
 	var urls []string
 	firstUrl := GetCategoryUrl(categoryID, 1, perPage)
 	urls = append(urls, firstUrl)
