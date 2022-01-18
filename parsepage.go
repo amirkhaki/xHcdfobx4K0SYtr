@@ -32,47 +32,82 @@ func ParseProductPage(url string) (Product, error) {
 			product.Images = append(product.Images, map[string]string{"src": govdeals + attr.Val})
 		}
 	}
-	titleTdTag := getNodesWithAttrValue(rootNode, "td", "id", "asset_short_desc_id")[0]
-	titleNode := getNodesWithOptions(titleTdTag, func(n *html.Node) bool {
+	tTdTags := getNodesWithAttrValue(rootNode, "td", "id", "asset_short_desc_id")
+	if len(tTdTags) < 1 {
+		return product, fmt.Errorf("No title tag")
+	}
+	titleTdTag := tTdTags[0]
+	titleNodes := getNodesWithOptions(titleTdTag, func(n *html.Node) bool {
 		if n.Type == html.TextNode {
 			return true
 		}
 		return false
-	})[0]
+	})
+	if len(titleNodes) < 1 {
+		return product, fmt.Errorf("No title node")
+	}
+	titleNode := titleNodes[0]
 	product.Name = titleNode.Data
-	bidTable := getNodesWithAttrValue(rootNode, "table", "id", "bid_tbl")[0]
+	bidTables := getNodesWithAttrValue(rootNode, "table", "id", "bid_tbl")
+	if len(bidTables) < 1 {
+		return product, fmt.Errorf("No bid Table")
+	}
+	bidTable := bidTables[0]
 	bTags := getNodesWithOptions(bidTable, func(n *html.Node) bool {
 		if n.Type == html.ElementNode && n.Data == "b" {
 			return true
 		}
 		return false
 	})
+	if len(bTags) < 3 {
+		return product, fmt.Errorf("no bTags")
+	}
 	bTag := bTags[2]
-	priceNode := getNodesWithOptions(bTag, func(n *html.Node) bool {
+	priceNodes := getNodesWithOptions(bTag, func(n *html.Node) bool {
 		if n.Type == html.TextNode {
 			return true
 		}
 		return false
-	})[0]
+	})
+	if len(priceNodes) < 1 {
+		return product, fmt.Errorf("No price node")
+	}
+	priceNode := priceNodes[0]
 	if strings.Contains(priceNode.Data, "*") {
 		bTag = bTags[3]
-		priceNode = getNodesWithOptions(bTag, func(n *html.Node) bool {
+		priceNodes = getNodesWithOptions(bTag, func(n *html.Node) bool {
 			if n.Type == html.TextNode {
 				return true
 			}
 			return false
-		})[0]
+		})
+		if len(priceNodes) < 1 {
+			return product, fmt.Errorf("No price node")
+		}
+		priceNode = priceNodes[0]
 
 	}
 	product.Price = priceNode.Data
-	sellerTbl := getNodesWithAttrValue(rootNode, "table", "class", "table ml-1 pl-0")[0]
-	tdDesc := getNodesWithAttrValue(sellerTbl, "td", "colspan", "2")[1]
-	descP := getNodesWithOptions(tdDesc, func(n *html.Node) bool {
+	sellerTbls := getNodesWithAttrValue(rootNode, "table", "class", "table ml-1 pl-0")
+	if len(sellerTbls) < 1 {
+		return product, fmt.Errorf("no seller table")
+	}
+	sellerTbl := sellerTbls[0]
+	tdDescs := getNodesWithAttrValue(sellerTbl, "td", "colspan", "2")
+	if len(tdDescs) < 2 {
+		return product, fmt.Errorf("no description td")
+	}
+	tdDesc := tdDescs[1]
+	descPs := getNodesWithOptions(tdDesc, func(n *html.Node) bool {
 		if n.Type == html.ElementNode && (n.Data == "P" || n.Data == "p") {
 			return true
 		}
 		return false
-	})[0]
+	})
+	if len(descPs) < 1 {
+		return product, fmt.Errorf("no description p")
+	}
+	descP := descPs[0]
 	var buf bytes.Buffer
 	err = html.Render(&buf, descP)
 	if err != nil {

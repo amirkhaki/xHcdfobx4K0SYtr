@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"context"
 )
 
 var categoryID int = 57
 var perPage int = 25
+func GetDBKey(id, acctid int) string {
+	return strconv.Itoa(id) + "|" + strconv.Itoa(acctid)
 
+}
 func GetStartRowsFromUrl(uri string) (from, to int, err error) {
 	u, err := url.Parse(uri)
 	if err != nil {
@@ -21,6 +25,9 @@ func GetStartRowsFromUrl(uri string) (from, to int, err error) {
 	fmt.Println(m)
 	fmt.Printf("%T\n", m["StartRow"])
 	from, err = strconv.Atoi(m["StartRow"][0])
+	if err != nil {
+		return
+	}
 	count, err := strconv.Atoi(m["rowCount"][0])
 	if err != nil {
 		return
@@ -28,9 +35,34 @@ func GetStartRowsFromUrl(uri string) (from, to int, err error) {
 	to = from + count - 1
 	return
 }
-func main() {
-
+func GetProductID(uri string)(id, acctid int, err error) {
+	u, err := url.Parse(uri)
+	if err != nil {
+		return
+	}
+	m, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		return
+	}
+	id, err = strconv.Atoi(m["itemid"][0])
 	
+	if err != nil {
+		return
+	}
+	acctid, err = strconv.Atoi(m["acctid"][0])
+	if err != nil {
+		return
+	}
+	return
+}
+func main() {
+	db := GetDB()
+	s3Client, err := GetS3Client()
+	if err != nil {
+		fmt.Println("couldnt connect to s3\n", err)
+		return
+	}
+	ctx := context.Background()
 	var urls []string
 	firstUrl := GetCategoryUrl(categoryID, 1, perPage)
 	urls = append(urls, firstUrl)
@@ -87,15 +119,34 @@ func main() {
 			uri, err := GetProductUrl(elms[i])
 			if err != nil {
 				fmt.Println(err)
-				return
+				continue
+			}
+			id, acctid, err := GetProductID(govdeals + uri)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			if Exists(db, GetDBKey(id, acctid)) {
+				fmt.Println("product sended")
+				continue
 			}
 			prdct, err := ParseProductPage(govdeals + uri)
 			if err != nil {
 				fmt.Println(err)
-				return
+				continue
 			}
+			prdct.client = s3Client	
+			prdct.ctx = ctx
+			if err = SendProduct(prdct); err != nil {
+				fmt.Println(err)
+				continue
+			}
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			Set(db, GetDBKey(id, acctid), "sended")
 
-			fmt.Println(SendProduct(prdct))
 		}
 	}
 }
