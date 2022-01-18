@@ -57,7 +57,7 @@ func (p Product) GetPrice() (price string) {
 	return
 }
 func (p Product) ToJson() string {
-	p.Status = "pending"
+	p.Status = "publish"
 	p.Images = p.UploadImages()
 	//p.Images = []map[string]string{}
 	p.Price = p.GetPrice()
