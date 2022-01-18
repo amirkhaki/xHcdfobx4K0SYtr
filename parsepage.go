@@ -26,12 +26,23 @@ func ParseProductPage(url string) (Product, error) {
 	if err != nil {
 		return product, fmt.Errorf("Error during parsing page: %w", err)
 	}
-	imageATag := getNodesWithAttrValue(rootNode, "a", "id", "thumb1")[0]
-	for _, attr := range imageATag.Attr {
-		if attr.Key == "href" {
-			product.Images = append(product.Images, map[string]string{"src": govdeals + attr.Val})
+	func(){
+		imageDivs := getNodesWithAttrValue(rootNode, "div", "class", "carousel-inner")
+		if len(imageDivs) <1 {
+			return
 		}
-	}
+		imageDiv := imageDivs[0]
+		imgTags := getNodesWithAttrValue(imageDiv, "img", "class", "img-fluid")
+		for _, img := range(imgTags) {
+			for _, attr := range img.Attr {
+				if attr.Key == "src" {
+					product.Images = append(product.Images, map[string]string{"src": govdeals + attr.Val})
+				}
+			}
+
+		}
+		return
+	}()
 	tTdTags := getNodesWithAttrValue(rootNode, "td", "id", "asset_short_desc_id")
 	if len(tTdTags) < 1 {
 		return product, fmt.Errorf("No title tag")
