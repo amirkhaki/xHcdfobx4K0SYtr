@@ -62,7 +62,6 @@ func (p Product) ToJson() string {
 	//p.Images = []map[string]string{}
 	p.Price = p.GetPrice()
 	jsonStr, _ := json.Marshal(p)
-	fmt.Println(string(jsonStr))
 	return string(jsonStr)
 }
 func (p Product) ToValues() (values url.Values) {

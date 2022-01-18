@@ -21,6 +21,5 @@ func SendProduct(p Product) error {
 	}
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
-	fmt.Println(string(body))
 	return nil
 }

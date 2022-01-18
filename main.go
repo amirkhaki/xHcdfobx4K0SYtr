@@ -22,8 +22,6 @@ func GetStartRowsFromUrl(uri string) (from, to int, err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println(m)
-	fmt.Printf("%T\n", m["StartRow"])
 	from, err = strconv.Atoi(m["StartRow"][0])
 	if err != nil {
 		return
@@ -101,7 +99,6 @@ func main() {
 		}
 
 	}()
-	fmt.Println(urls)
 	for _, u := range urls {
 		fmt.Println(u)
 		page, err = LoadUrl(u)
@@ -127,7 +124,6 @@ func main() {
 				continue
 			}
 			if Exists(db, GetDBKey(id, acctid)) {
-				fmt.Println("product sended")
 				continue
 			}
 			prdct, err := ParseProductPage(govdeals + uri)
