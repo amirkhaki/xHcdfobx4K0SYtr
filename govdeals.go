@@ -24,6 +24,7 @@ type Product struct {
 	Name        string              `json:"name"`
 	Status      string              `json:"status"`
 	Description string              `json:"description"`
+	ShortDesc string `json:"short_description"`
 	Price       string              `json:"regular_price"`
 	Images      []map[string]string `json:"images"`
 	client *minio.Client `json:"-"`

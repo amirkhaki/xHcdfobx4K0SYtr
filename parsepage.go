@@ -119,6 +119,14 @@ func ParseProductPage(url string) (Product, error) {
 		return product, fmt.Errorf("no description p")
 	}
 	descP := descPs[0]
+	descTexts := getNodesWithOptions(descP, func(n *html.Node) bool {
+		return n.Type == html.TextNode
+	})
+	descText := ""
+	for _, dP := range(descTexts) {
+		descText += dP.Data
+	}
+	product.ShortDesc = descText
 	var buf bytes.Buffer
 	err = html.Render(&buf, descP)
 	if err != nil {
