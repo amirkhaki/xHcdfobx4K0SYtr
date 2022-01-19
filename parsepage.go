@@ -109,17 +109,7 @@ func ParseProductPage(url string) (Product, error) {
 		return product, fmt.Errorf("no description td")
 	}
 	tdDesc := tdDescs[1]
-	descPs := getNodesWithOptions(tdDesc, func(n *html.Node) bool {
-		if n.Type == html.ElementNode && (n.Data == "P" || n.Data == "p") {
-			return true
-		}
-		return false
-	})
-	if len(descPs) < 1 {
-		return product, fmt.Errorf("no description p")
-	}
-	descP := descPs[0]
-	descTexts := getNodesWithOptions(descP, func(n *html.Node) bool {
+	descTexts := getNodesWithOptions(tdDesc, func(n *html.Node) bool {
 		return n.Type == html.TextNode
 	})
 	descText := ""
@@ -128,7 +118,7 @@ func ParseProductPage(url string) (Product, error) {
 	}
 	product.ShortDesc = descText
 	var buf bytes.Buffer
-	err = html.Render(&buf, descP)
+	err = html.Render(&buf, tdDesc)
 	if err != nil {
 		return product, fmt.Errorf("Error during rendering description: %w", err)
 	}
