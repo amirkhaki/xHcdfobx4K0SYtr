@@ -37,6 +37,7 @@ func (p Product) UploadImages() []map[string]string {
 	for _, img := range p.Images {
 		if src, ok := img["src"]; ok {
 			f, err := DownloadFile(src, "jpg")
+			defer os.Remove(f.Name())
 			if err != nil {
 				fmt.Println(err)
 				continue
