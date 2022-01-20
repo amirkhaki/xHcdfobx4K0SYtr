@@ -5,7 +5,19 @@ import (
 	"fmt"
 	"golang.org/x/net/html"
 	"strings"
+	"time"
 )
+
+func parseDate(dt string) (time.Time, error) {
+	dt = strings.Replace(dt, "ET", "EST", -1)
+	layout := "1/2/06 3:04 PM MST"
+	t, err := time.Parse(layout, dt)
+	if err != nil {
+		return t, fmt.Errorf("error during parse time: %w", err)
+	}
+	return t, nil
+}
+
 
 func render(nodes ...*html.Node) {
 	for i, n := range nodes {
@@ -99,6 +111,23 @@ func ParseProductPage(url string) (Product, error) {
 
 	}
 	product.Price = priceNode.Data
+	dateBTag := bTags[0]
+	dateNodes := getNodesWithOptions(dateBTag, func(n *html.Node) bool {
+		if n.Type == html.TextNode {
+			return true
+		}
+		return false
+	})
+	if len(dateNodes) < 1 {
+		return product, fmt.Errorf("No date node")
+	}
+	dateNode := dateNodes[0]
+	endDate := dateNode.Data
+	t, err := parseDate(endDate)
+	if err != nil {
+		return product, fmt.Errorf("couudnt parse end date: %w", err)
+	}
+	product.Date = t
 	sellerTbls := getNodesWithAttrValue(rootNode, "table", "class", "table ml-1 pl-0")
 	if len(sellerTbls) < 1 {
 		return product, fmt.Errorf("no seller table")

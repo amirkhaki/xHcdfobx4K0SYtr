@@ -9,9 +9,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 	"os"
 	"strings"
-	"time"
 )
 
 var govdeals = "https://www.govdeals.com/"
@@ -22,6 +22,7 @@ func GetCategoryUrl(category, start, count int) string {
 
 type Product struct {
 	ID          int                 `json:"-"`
+	Date time.Time `json:"-"`
 	Name        string              `json:"name"`
 	Status      string              `json:"status"`
 	Description string              `json:"description"`
@@ -66,6 +67,10 @@ func (p Product) ToJson() string {
 	} else {
 		p.Images = p.UploadImages()
 	}
+	if p.Date.Before(time.Now()) {
+		p.Status = "private" 
+	}
+
 	p.Price = p.GetPrice()
 	jsonStr, _ := json.Marshal(p)
 	return string(jsonStr)
