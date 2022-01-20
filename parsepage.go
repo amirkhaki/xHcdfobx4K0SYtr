@@ -26,14 +26,14 @@ func ParseProductPage(url string) (Product, error) {
 	if err != nil {
 		return product, fmt.Errorf("Error during parsing page: %w", err)
 	}
-	func(){
+	func() {
 		imageDivs := getNodesWithAttrValue(rootNode, "div", "class", "carousel-inner")
-		if len(imageDivs) <1 {
+		if len(imageDivs) < 1 {
 			return
 		}
 		imageDiv := imageDivs[0]
 		imgTags := getNodesWithAttrValue(imageDiv, "img", "class", "img-fluid")
-		for _, img := range(imgTags) {
+		for _, img := range imgTags {
 			for _, attr := range img.Attr {
 				if attr.Key == "src" {
 					product.Images = append(product.Images, map[string]string{"src": govdeals + attr.Val})
@@ -113,7 +113,7 @@ func ParseProductPage(url string) (Product, error) {
 		return n.Type == html.TextNode
 	})
 	descText := ""
-	for _, dP := range(descTexts) {
+	for _, dP := range descTexts {
 		descText += dP.Data
 	}
 	product.ShortDesc = descText

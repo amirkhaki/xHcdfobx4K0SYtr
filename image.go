@@ -1,25 +1,23 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"context"
+	"io"
 	"net/http"
 	"os"
-	"fmt"
-	"io"
-
 )
 
-
-func UploadToS3(client *minio.Client, ctx context.Context,filePath, fileName, contentType string) error {
+func UploadToS3(client *minio.Client, ctx context.Context, filePath, fileName, contentType string) error {
 	userMetaData := map[string]string{"x-amz-acl": "public-read"}
-	_, err := client.FPutObject(ctx,os.Getenv("S3_BUCKET"), fileName, 
-		filePath, minio.PutObjectOptions{ContentType:contentType, UserMetadata: userMetaData})
-		if err != nil {
-			return fmt.Errorf("Error during uploading %s: %w", filePath, err)
-		}
-		return nil
+	_, err := client.FPutObject(ctx, os.Getenv("S3_BUCKET"), fileName,
+		filePath, minio.PutObjectOptions{ContentType: contentType, UserMetadata: userMetaData})
+	if err != nil {
+		return fmt.Errorf("Error during uploading %s: %w", filePath, err)
+	}
+	return nil
 }
 func GetObjectUrl(fileName string) string {
 	uri := "https://" + os.Getenv("S3_BUCKET") + "." + os.Getenv("S3_ENDPOINT")
@@ -58,4 +56,3 @@ func DownloadFile(url, ext string) (*os.File, error) {
 	}
 	return f, nil
 }
-

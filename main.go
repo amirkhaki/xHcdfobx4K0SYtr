@@ -1,14 +1,23 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strconv"
-	"context"
 )
 
 var categoryID int = 57
 var perPage int = 25
+
+func unmarshal(jsn string) (map[string]interface{}, error) {
+	var rtrn map[string]interface{}
+	if err := json.Unmarshal([]byte(jsn), &rtrn); err != nil {
+		return nil, fmt.Errorf("coudn't unmarshal: %w", err)
+	}
+	return rtrn, nil
+}
 func GetDBKey(id, acctid int) string {
 	return strconv.Itoa(id) + "|" + strconv.Itoa(acctid)
 
@@ -33,7 +42,7 @@ func GetStartRowsFromUrl(uri string) (from, to int, err error) {
 	to = from + count - 1
 	return
 }
-func GetProductID(uri string)(id, acctid int, err error) {
+func GetProductID(uri string) (id, acctid int, err error) {
 	u, err := url.Parse(uri)
 	if err != nil {
 		return
@@ -43,7 +52,7 @@ func GetProductID(uri string)(id, acctid int, err error) {
 		return
 	}
 	id, err = strconv.Atoi(m["itemid"][0])
-	
+
 	if err != nil {
 		return
 	}
@@ -100,7 +109,6 @@ func main() {
 
 	}()
 	for _, u := range urls {
-		fmt.Println(u)
 		page, err = LoadUrl(u)
 		if err != nil {
 			fmt.Println(err)
@@ -123,25 +131,51 @@ func main() {
 				fmt.Println(err)
 				continue
 			}
-			if Exists(db, GetDBKey(id, acctid)) {
-				continue
-			}
+			dbKey := GetDBKey(id, acctid)
 			prdct, err := ParseProductPage(govdeals + uri)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			prdct.client = s3Client	
+			prdct.client = s3Client
 			prdct.ctx = ctx
-			if err = SendProduct(prdct); err != nil {
-				fmt.Println(err)
+			if Exists(db, dbKey) {
+				pidStr, err := Get(db, dbKey)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+				pid, err := strconv.Atoi(pidStr)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+				prdct.ID = pid
+				_, err = UpdateProduct(prdct)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+				fmt.Println("product updated: ", prdct.ID)
 				continue
 			}
+			resp, err := SendProduct(prdct)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			Set(db, GetDBKey(id, acctid), "sended")
+			respMap, err := unmarshal(resp)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			if id, ok := respMap["id"].(float64); ok {
+				idStr := strconv.Itoa(int(id))
+				fmt.Println("product sended: ", idStr)
+				Set(db, dbKey, idStr)
+				continue
+
+			}
 
 		}
 	}

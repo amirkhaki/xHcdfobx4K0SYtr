@@ -1,17 +1,17 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/minio/minio-go/v7"
 	"golang.org/x/net/html"
 	"io"
-	"context"
 	"net/http"
 	"net/url"
-	"time"
+	"os"
 	"strings"
-	"github.com/minio/minio-go/v7"
-
+	"time"
 )
 
 var govdeals = "https://www.govdeals.com/"
@@ -21,32 +21,33 @@ func GetCategoryUrl(category, start, count int) string {
 }
 
 type Product struct {
+	ID          int                 `json:"-"`
 	Name        string              `json:"name"`
 	Status      string              `json:"status"`
 	Description string              `json:"description"`
-	ShortDesc string `json:"short_description"`
+	ShortDesc   string              `json:"short_description"`
 	Price       string              `json:"regular_price"`
 	Images      []map[string]string `json:"images"`
-	client *minio.Client `json:"-"`
-	ctx context.Context `json:"-"`
+	client      *minio.Client       `json:"-"`
+	ctx         context.Context     `json:"-"`
 }
 
 func (p Product) UploadImages() []map[string]string {
 	var images []map[string]string
-	for _, img := range(p.Images) {
+	for _, img := range p.Images {
 		if src, ok := img["src"]; ok {
-			f, err := DownloadFile(src, "jpg") 
+			f, err := DownloadFile(src, "jpg")
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
 			fileName := fmt.Sprintf("%d.jpg", time.Now().UnixNano())
-			err = UploadToS3(p.client,p.ctx, f.Name(), fileName, "image/jpeg" )
+			err = UploadToS3(p.client, p.ctx, f.Name(), fileName, "image/jpeg")
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			images = append(images, map[string]string{"src":GetObjectUrl(fileName)})
+			images = append(images, map[string]string{"src": GetObjectUrl(fileName)})
 		}
 	}
 	return images
@@ -58,8 +59,12 @@ func (p Product) GetPrice() (price string) {
 }
 func (p Product) ToJson() string {
 	p.Status = "publish"
-	p.Images = p.UploadImages()
-	//p.Images = []map[string]string{}
+	if os.Getenv("WC_DEVELOPING") != "" {
+		p.Status = "pending"
+		p.Images = []map[string]string{}
+	} else {
+		p.Images = p.UploadImages()
+	}
 	p.Price = p.GetPrice()
 	jsonStr, _ := json.Marshal(p)
 	return string(jsonStr)

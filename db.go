@@ -1,10 +1,9 @@
 package main
 
 import (
-	"github.com/peterbourgon/diskv/v3"
 	"fmt"
+	"github.com/peterbourgon/diskv/v3"
 )
-
 
 func GetDB() *diskv.Diskv {
 	return diskv.New(diskv.Options{})
