@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-var categoryID int = 57
+var categoryID int = 67
 var perPage int = 25
 
 func contains(s []string, str string) bool {
@@ -172,6 +172,7 @@ func main() {
 				fmt.Println("product updated: ", prdct.ID)
 				continue
 			}
+			prdct.Categories = append(prdct.Categories, Category{ID: 180})
 			resp, err := SendProduct(prdct)
 			if err != nil {
 				fmt.Println(err)

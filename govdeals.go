@@ -19,7 +19,9 @@ var govdeals = "https://www.govdeals.com/"
 func GetCategoryUrl(category, start, count int) string {
 	return fmt.Sprintf("%sindex.cfm?fa=Main.AdvSearchResultsNew&searchPg=Category&additionalParams=true&sortOption=ad&timing=BySimple&timingType=&category=%d&rowCount=%d&StartRow=%d", govdeals, category, count, start)
 }
-
+type Category struct{
+	ID int `json:"id"`
+}
 type Product struct {
 	ID          int                 `json:"-"`
 	Date time.Time `json:"-"`
@@ -31,6 +33,7 @@ type Product struct {
 	Images      []map[string]string `json:"images"`
 	client      *minio.Client       `json:"-"`
 	ctx         context.Context     `json:"-"`
+	Categories []Category `json:"categories"`
 }
 
 func (p Product) UploadImages() []map[string]string {
