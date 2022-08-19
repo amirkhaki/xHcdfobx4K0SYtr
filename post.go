@@ -6,7 +6,30 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 )
+
+func validateProduct(p Product) error {
+	keywords := os.Getenv("X_KEYWORDS")
+	if keywords == "" {
+		return nil
+	}
+	// kyewords slice
+	KWs := strings.Split(keywords, ",")
+	if contains := func() bool {
+		for _, kw := range KWs {
+			if strings.Contains(p.Name, kw) {
+				return true
+			}
+		}
+		return false
+	}(); !contains {
+		return fmt.Errorf("product name doesnt contain any of keywords")
+	}
+	return nil
+
+}
+
 func DeleteProduct(pid int) (string, error){
 	wc_up_prdct_endpoint := os.Getenv("WC_URL") + "/wp-json/wc/v3/products/"
 	wc_up_prdct_endpoint += fmt.Sprintf("%d", pid)

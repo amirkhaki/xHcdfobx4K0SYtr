@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/peterbourgon/diskv/v3"
+	"strconv"
 )
 
 func GetDB() *diskv.Diskv {
-	return diskv.New(diskv.Options{})
+	return diskv.New(diskv.Options{
+		BasePath: "diskv/"+strconv.Itoa(categoryID),
+	})
 }
 
 func Set(db *diskv.Diskv, key, value string) error {

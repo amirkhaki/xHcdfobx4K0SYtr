@@ -57,6 +57,20 @@ func (p Product) UploadImages() []map[string]string {
 	}
 	return images
 }
+
+func (p Product) DeleteImages() ( err error ) {
+	for _, img := range p.Images {
+		if src, ok := img["src"]; ok {
+			srcParts := strings.Split(src,  "/")
+			fileName := srcParts[len(srcParts) - 1]
+			if er := DeleteFromS3(p.client, p.ctx, fileName); er != nil {
+				err = fmt.Errorf("DeleteImage err: %s: %w", er.Error(), err)
+			}
+		}
+	}
+	return
+}
+
 func (p Product) GetPrice() (price string) {
 	price = strings.Replace(p.Price, "$", "", -1)
 	price = strings.Replace(price, ",", "", -1)

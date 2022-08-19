@@ -9,11 +9,18 @@ import (
 	"net/http"
 	"os"
 )
+func DeleteFromS3(client *minio.Client, ctx context.Context, fileName string) error {
+	err := client.RemoveObject(ctx, os.Getenv("S3_BUCKET"), fileName, minio.RemoveObjectOptions{})
+	if err != nil {
+		return fmt.Errorf("Could not delete file : %w", err)
+	}
+	return nil
+}
 
 func UploadToS3(client *minio.Client, ctx context.Context, filePath, fileName, contentType string) error {
 	userMetaData := map[string]string{"x-amz-acl": "public-read"}
 	_, err := client.FPutObject(ctx, os.Getenv("S3_BUCKET"), fileName,
-		filePath, minio.PutObjectOptions{ContentType: contentType, UserMetadata: userMetaData})
+	filePath, minio.PutObjectOptions{ContentType: contentType, UserMetadata: userMetaData})
 	if err != nil {
 		return fmt.Errorf("Error during uploading %s: %w", filePath, err)
 	}

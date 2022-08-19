@@ -6,10 +6,19 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"flag"
 )
 
 var categoryID int = 67
+var distinationCategoryID int = 180
 var perPage int = 25
+
+func init() {
+	flag.IntVar(&categoryID, "category", 67, "category id in govdeals")
+	flag.IntVar(&distinationCategoryID, "dist", 180, "distination category id in your wordpress websitw")
+	flag.Parse()
+	fmt.Println(categoryID, distinationCategoryID)
+}
 
 func contains(s []string, str string) bool {
 	for _, v := range s {
@@ -170,9 +179,13 @@ func main() {
 				}
 				sended = append(sended, dbKey)
 				fmt.Println("product updated: ", prdct.ID)
+				err = prdct.DeleteImages()
+				if err != nil {
+					fmt.Println(err)
+				}
 				continue
 			}
-			prdct.Categories = append(prdct.Categories, Category{ID: 180})
+			prdct.Categories = append(prdct.Categories, Category{ID: distinationCategoryID})
 			resp, err := SendProduct(prdct)
 			if err != nil {
 				fmt.Println(err)
@@ -188,6 +201,10 @@ func main() {
 				fmt.Println("product sended: ", idStr)
 				fmt.Println(Set(db, dbKey, idStr))
 				sended = append(sended, dbKey)
+				err = prdct.DeleteImages()
+				if err != nil {
+					fmt.Println(err)
+				}
 				continue
 
 			}
