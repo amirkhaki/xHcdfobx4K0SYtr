@@ -47,7 +47,22 @@ func GetS3Client() (*minio.Client, error) {
 }
 
 func DownloadFile(url, ext string) (*os.File, error) {
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", fmt.Errorf("Error during creating request to %s: %w", url, err)
+	}
+	req.Header.Set("Host", "www.govdeals.com")
+	req.Header.Set("Sec-Ch-Ua-Mobile", "?1")
+	req.Header.Set("Upgrade-Insecure-Requests", "1")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Linux; Android 10; M2006C3LG) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Mobile Safari/537.36")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+	req.Header.Set("Sec-Fetch-Site", "none")
+	req.Header.Set("Sec-Fetch-Mode", "navigate")
+	req.Header.Set("Sec-Fetch-User", "?1")
+	req.Header.Set("Sec-Fetch-Dest", "document")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9,fa;q=0.8")
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("Error during getting file %s: %w", url, err)
 	}

@@ -110,7 +110,7 @@ type nodeOption func(*html.Node) bool
 func LoadUrl(url string) (string, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		// handle err
+		return "", fmt.Errorf("Error during creating request to %s: %w", url, err)
 	}
 	req.Header.Set("Host", "www.govdeals.com")
 	req.Header.Set("Sec-Ch-Ua-Mobile", "?1")
