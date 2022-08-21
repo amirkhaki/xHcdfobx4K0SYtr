@@ -17,8 +17,10 @@ func validateProduct(p Product) error {
 	// kyewords slice
 	KWs := strings.Split(keywords, ",")
 	if contains := func() bool {
+		name := strings.ToLower(p.Name)
 		for _, kw := range KWs {
-			if strings.Contains(p.Name, kw) {
+			kw = strings.ToLower(kw)
+			if strings.Contains(name, kw) {
 				return true
 			}
 		}
