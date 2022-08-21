@@ -6,6 +6,7 @@ import (
 	"golang.org/x/net/html"
 	"strings"
 	"time"
+	"log"
 )
 
 func parseDate(dt string) (time.Time, error) {
@@ -23,10 +24,10 @@ func render(nodes ...*html.Node) {
 	for i, n := range nodes {
 		var buf bytes.Buffer
 		html.Render(&buf, n)
-		fmt.Println("#", i)
-		fmt.Println(buf.String())
+		log.Println("#", i)
+		log.Println(buf.String())
 	}
-	fmt.Println("DONE")
+	log.Println("DONE")
 }
 func ParseProductPage(url string) (Product, error) {
 	product := Product{}

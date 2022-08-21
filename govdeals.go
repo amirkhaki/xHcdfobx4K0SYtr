@@ -12,6 +12,7 @@ import (
 	"time"
 	"os"
 	"strings"
+	"log"
 )
 
 var govdeals = "https://www.govdeals.com/"
@@ -43,13 +44,13 @@ func (p Product) UploadImages() []map[string]string {
 			f, err := DownloadFile(src, "jpg")
 			defer os.Remove(f.Name())
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			fileName := fmt.Sprintf("%d.jpg", time.Now().UnixNano())
 			err = UploadToS3(p.client, p.ctx, f.Name(), fileName, "image/jpeg")
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			images = append(images, map[string]string{"src": GetObjectUrl(fileName)})

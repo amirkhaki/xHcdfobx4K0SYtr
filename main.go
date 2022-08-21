@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strconv"
 	"flag"
+	"log"
 )
 
 var categoryID int = 67
@@ -17,7 +18,7 @@ func init() {
 	flag.IntVar(&categoryID, "category", 67, "category id in govdeals")
 	flag.IntVar(&distinationCategoryID, "dist", 180, "distination category id in your wordpress websitw")
 	flag.Parse()
-	fmt.Println(categoryID, distinationCategoryID)
+	log.Println(categoryID, distinationCategoryID)
 }
 
 func contains(s []string, str string) bool {
@@ -87,7 +88,7 @@ func main() {
 	sended := []string{}
 	s3Client, err := GetS3Client()
 	if err != nil {
-		fmt.Println("couldnt connect to s3\n", err)
+		log.Println("couldnt connect to s3\n", err)
 		return
 	}
 	ctx := context.Background()
@@ -96,23 +97,23 @@ func main() {
 	urls = append(urls, firstUrl)
 	page, err := LoadUrl(firstUrl)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	node, err := ParsePage(page)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	func() {
 		lastPageUrl, err := GetLastPage(node)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return
 		}
 		_, lastItem, err := GetStartRowsFromUrl(lastPageUrl)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return
 		}
 		_, now, err := GetStartRowsFromUrl(firstUrl)
@@ -132,30 +133,30 @@ func main() {
 	for _, u := range urls {
 		page, err = LoadUrl(u)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			continue
 		}
 		node, err = ParsePage(page)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			continue
 		}
 		elms := GetProductNodes(node)
 		for i := range elms {
 			uri, err := GetProductUrl(elms[i])
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			id, acctid, err := GetProductID(govdeals + uri)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			dbKey := GetDBKey(id, acctid)
 			prdct, err := ParseProductPage(govdeals + uri)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			prdct.client = s3Client
@@ -163,47 +164,47 @@ func main() {
 			if Exists(db, dbKey) {
 				pidStr, err := Get(db, dbKey)
 				if err != nil {
-					fmt.Println(err)
+					log.Println(err)
 					continue
 				}
 				pid, err := strconv.Atoi(pidStr)
 				if err != nil {
-					fmt.Println(err)
+					log.Println(err)
 					continue
 				}
 				prdct.ID = pid
 				_, err = UpdateProduct(prdct)
 				if err != nil {
-					fmt.Println(err)
+					log.Println(err)
 					continue
 				}
 				sended = append(sended, dbKey)
-				fmt.Println("product updated: ", prdct.ID)
+				log.Println("product updated: ", prdct.ID)
 				err = prdct.DeleteImages()
 				if err != nil {
-					fmt.Println(err)
+					log.Println(err)
 				}
 				continue
 			}
 			prdct.Categories = append(prdct.Categories, Category{ID: distinationCategoryID})
 			resp, err := SendProduct(prdct)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			respMap, err := unmarshal(resp)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			if id, ok := respMap["id"].(float64); ok {
 				idStr := strconv.Itoa(int(id))
-				fmt.Println("product sended: ", idStr)
-				fmt.Println(Set(db, dbKey, idStr))
+				log.Println("product sended: ", idStr)
+				log.Println(Set(db, dbKey, idStr))
 				sended = append(sended, dbKey)
 				err = prdct.DeleteImages()
 				if err != nil {
-					fmt.Println(err)
+					log.Println(err)
 				}
 				continue
 
@@ -216,25 +217,25 @@ func main() {
 		if !contains(sended, k) {
 			dpidStr, err := Get(db, k)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			dpid, err := strconv.Atoi(dpidStr)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			if _, err = DeleteProduct(dpid); err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			Delete(db, k)
 			deleted = append(deleted, k)
-			fmt.Println("product deleted: ", dpid)
+			log.Println("product deleted: ", dpid)
 			continue
 
 		}
 	}
-	fmt.Println("products sended: ", sended)
-	fmt.Println("products deleted: ", deleted)
+	log.Println("products sended: ", sended)
+	log.Println("products deleted: ", deleted)
 }
