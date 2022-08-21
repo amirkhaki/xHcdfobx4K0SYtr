@@ -11,6 +11,7 @@ import (
 
 func validateProduct(p Product) error {
 	keywords := os.Getenv("X_KEYWORDS")
+	debug("keywords are ", keywords)
 	if keywords == "" {
 		return nil
 	}
@@ -18,7 +19,9 @@ func validateProduct(p Product) error {
 	KWs := strings.Split(keywords, ",")
 	if contains := func() bool {
 		name := strings.ToLower(p.Name)
+		debug("name in lower case is ", name)
 		for _, kw := range KWs {
+			debug("kw is ", kw)
 			kw = strings.ToLower(kw)
 			if strings.Contains(name, kw) {
 				return true
@@ -53,6 +56,10 @@ func DeleteProduct(pid int) (string, error){
 }
 
 func UpdateProduct(p Product) (string, error){
+	err := validateProduct(p)
+	if err != nil {
+		return "", fmt.Errorf("Error during validating product: %w", err)
+	}
 	wc_up_prdct_endpoint := os.Getenv("WC_URL") + "/wp-json/wc/v3/products/"
 	wc_up_prdct_endpoint += fmt.Sprintf("%d", p.ID)
 	wc_up_prdct_endpoint += "?consumer_key=" + os.Getenv("WP_KEY") + "&consumer_secret=" + os.Getenv("WP_SECRET")
@@ -72,6 +79,10 @@ func UpdateProduct(p Product) (string, error){
 	return string(response), nil
 }
 func SendProduct(p Product) (string, error) {
+	err := validateProduct(p)
+	if err != nil {
+		return "", fmt.Errorf("Error during validating product: %w", err)
+	}
 	wc_prdct_endpoint := os.Getenv("WC_URL") + "/wp-json/wc/v3/products/"
 	wc_prdct_endpoint += "?consumer_key=" + os.Getenv("WP_KEY") + "&consumer_secret=" + os.Getenv("WP_SECRET")
 	req, err := http.NewRequest("POST", wc_prdct_endpoint, bytes.NewBuffer([]byte(p.ToJson())))
