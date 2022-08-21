@@ -49,7 +49,7 @@ func GetS3Client() (*minio.Client, error) {
 func DownloadFile(url, ext string) (*os.File, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return "", fmt.Errorf("Error during creating request to %s: %w", url, err)
+		return nil, fmt.Errorf("Error during creating request to %s: %w", url, err)
 	}
 	req.Header.Set("Host", "www.govdeals.com")
 	req.Header.Set("Sec-Ch-Ua-Mobile", "?1")
