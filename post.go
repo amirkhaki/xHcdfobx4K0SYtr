@@ -11,7 +11,6 @@ import (
 
 func validateProduct(p Product) error {
 	keywords := os.Getenv("X_KEYWORDS")
-	debug("keywords are ", keywords)
 	if keywords == "" {
 		return nil
 	}
@@ -19,11 +18,11 @@ func validateProduct(p Product) error {
 	KWs := strings.Split(keywords, ",")
 	if contains := func() bool {
 		name := strings.ToLower(p.Name)
-		debug("name in lower case is ", name)
 		for _, kw := range KWs {
-			debug("kw is ", kw)
 			kw = strings.ToLower(kw)
 			if strings.Contains(name, kw) {
+				debug("found\nname in lower case is ", name)
+				debug("kw is ", kw)
 				return true
 			}
 		}

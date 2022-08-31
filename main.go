@@ -18,7 +18,7 @@ func init() {
 	flag.IntVar(&categoryID, "category", 67, "category id in govdeals")
 	flag.IntVar(&distinationCategoryID, "dist", 180, "distination category id in your wordpress websitw")
 	flag.Parse()
-	log.Println(categoryID, distinationCategoryID)
+	debug(categoryID, distinationCategoryID)
 }
 
 func contains(s []string, str string) bool {
@@ -200,7 +200,10 @@ func main() {
 			if id, ok := respMap["id"].(float64); ok {
 				idStr := strconv.Itoa(int(id))
 				log.Println("product sended: ", idStr)
-				log.Println(Set(db, dbKey, idStr))
+				err = Set(db, dbKey, idStr)
+				if err != nil {
+					log.Println(err)
+				}
 				sended = append(sended, dbKey)
 				err = prdct.DeleteImages()
 				if err != nil {
@@ -208,6 +211,8 @@ func main() {
 				}
 				continue
 
+			} else {
+				debug(respMap)
 			}
 
 		}
