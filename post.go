@@ -59,6 +59,7 @@ func UpdateProduct(p Product) (string, error){
 	if err != nil {
 		return "", fmt.Errorf("Error during validating product: %w", err)
 	}
+	p.isUpdate = true
 	wc_up_prdct_endpoint := os.Getenv("WC_URL") + "/wp-json/wc/v3/products/"
 	wc_up_prdct_endpoint += fmt.Sprintf("%d", p.ID)
 	wc_up_prdct_endpoint += "?consumer_key=" + os.Getenv("WP_KEY") + "&consumer_secret=" + os.Getenv("WP_SECRET")

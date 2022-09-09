@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"flag"
 	"log"
+	"os"
 )
 
 var categoryID int = 67
@@ -15,6 +16,7 @@ var distinationCategoryID int = 180
 var perPage int = 25
 
 func init() {
+	log.SetOutput(os.Stdout)
 	flag.IntVar(&categoryID, "category", 67, "category id in govdeals")
 	flag.IntVar(&distinationCategoryID, "dist", 180, "distination category id in your wordpress websitw")
 	flag.Parse()

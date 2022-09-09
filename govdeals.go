@@ -35,6 +35,7 @@ type Product struct {
 	client      *minio.Client       `json:"-"`
 	ctx         context.Context     `json:"-"`
 	Categories []Category `json:"categories"`
+	isUpdate bool `json:"-"`
 }
 
 func (p Product) UploadImages() []map[string]string {
@@ -81,6 +82,8 @@ func (p Product) ToJson() string {
 	p.Status = "publish"
 	if os.Getenv("WC_DEVELOPING") != "" {
 		p.Status = "pending"
+		p.Images = []map[string]string{}
+	} else if p.isUpdate {
 		p.Images = []map[string]string{}
 	} else {
 		p.Images = p.UploadImages()
