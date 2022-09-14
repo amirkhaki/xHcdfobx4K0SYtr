@@ -39,6 +39,11 @@ type Product struct {
 
 func (p Product) UploadImages() []map[string]string {
 	var images []map[string]string
+	if len(p.Images) != 0 {
+		var tmp []map[string]string
+		tmp = append(tmp, p.Images[0])
+		p.Images = tmp
+	}
 	for _, img := range p.Images {
 		if src, ok := img["src"]; ok {
 			f, err := DownloadFile(src, "jpg")
