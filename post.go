@@ -59,11 +59,11 @@ func UpdateProduct(p Product) (string, error){
 	if err != nil {
 		return "", fmt.Errorf("Error during validating product: %w", err)
 	}
-	p.isUpdate = true
+	up := mapProductToUpProduct(p)
 	wc_up_prdct_endpoint := os.Getenv("WC_URL") + "/wp-json/wc/v3/products/"
-	wc_up_prdct_endpoint += fmt.Sprintf("%d", p.ID)
+	wc_up_prdct_endpoint += fmt.Sprintf("%d", up.ID)
 	wc_up_prdct_endpoint += "?consumer_key=" + os.Getenv("WP_KEY") + "&consumer_secret=" + os.Getenv("WP_SECRET")
-	req, err := http.NewRequest("POST", wc_up_prdct_endpoint, bytes.NewBuffer([]byte(p.ToJson())))
+	req, err := http.NewRequest("PATCH", wc_up_prdct_endpoint, bytes.NewBuffer([]byte(up.ToJson())))
 	req.SetBasicAuth(os.Getenv("WC_KEY"), os.Getenv("WC_SECRET"))
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	client := &http.Client{}
